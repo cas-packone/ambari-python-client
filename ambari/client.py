@@ -73,10 +73,9 @@ class APIClient(object):
     def host_component_delete(self,host,component):
         return self.request("/hosts/"+host+'/host_components/'+component,call_method=requests.delete)
     def host_delete(self,host):
+        ret=False
         for c in self.host_components(host):
             ret=self.host_component_delete(host,c)
+            if ret.status_code != requests.codes.ok:
+                return ret
         return ret
-
-if __name__ == "__main__":
-    c=APIClient('http://10.0.88.78:8080')
-    c.host_delete('slave0001.packone')
