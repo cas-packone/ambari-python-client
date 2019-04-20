@@ -72,10 +72,12 @@ class APIClient(object):
     #curl -u admin:admin -H "X-Requested-By: ambari" -X DELETE http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTERNAME/hosts/HOSTNAME/host_components/DATANODE
     def host_component_delete(self,host,component):
         return self.request("/hosts/"+host+'/host_components/'+component,call_method=requests.delete)
+    #https://cwiki.apache.org/confluence/display/AMBARI/Using+APIs+to+delete+a+service+or+all+host+components+on+a+host
+    #curl -u admin:admin -H "X-Requested-By: ambari" -X DELETE http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTERNAME/hosts/HOSTNAME
     def host_delete(self,host):
         ret=False
         for c in self.host_components(host):
             ret=self.host_component_delete(host,c)
             if ret.status_code != requests.codes.ok:
                 return ret
-        return ret
+        return self.request("/hosts/"+host,call_method=requests.delete)
