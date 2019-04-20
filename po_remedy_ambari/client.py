@@ -60,6 +60,9 @@ class APIClient(object):
     #curl -u admin:admin -H "X-Requested-By: ambari" -X GET "http://10.0.88.52:8080/api/v1/clusters/emr/services/YARN?fields=ServiceInfo/state"
     def service_status(self,service_name):
         return self.request("/services/"+service_name+'?fields=ServiceInfo/state')
+    #curl --user admin:admin -i -X POST http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTER_NAME/hosts/NEW_HOST_ADDED
+    def host_add(self,host):
+        return self.request("/hosts/"+host,call_method=requests.post)
     #https://cwiki.apache.org/confluence/display/AMBARI/Using+APIs+to+delete+a+service+or+all+host+components+on+a+host
     #curl -u admin:admin -H "X-Requested-By: ambari" -X GET  http://AMBARI_SERVER_HOST:8080/api/v1/clusters/c1/hosts/HOSTNAME
     def host_components(self,host):
@@ -68,6 +71,10 @@ class APIClient(object):
         for c in ret:
             cmpns.append(c['HostRoles']['component_name'])
         return cmpns
+    #curl -u admin:admin -X PUT -d '{"RequestInfo":{"context":"Stop Component"},"Body":{"HostRoles":{"state":"INSTALLED"}}}' http://AMBARI_SERVER_HOST:8080/api/v1/clusters/c1/hosts/HOSTNAME/host_components/COMPONENT_NAME
+    def  host_component_stop(self, host, component):
+        data='{"RequestInfo":{"context":"Stop Component"},"Body":{"HostRoles":{"state":"INSTALLED"}}}'
+        return self.request("/hosts/"+host+'/host_components/'+component,data)
     #https://cwiki.apache.org/confluence/display/AMBARI/Using+APIs+to+delete+a+service+or+all+host+components+on+a+host
     #curl -u admin:admin -H "X-Requested-By: ambari" -X DELETE http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTERNAME/hosts/HOSTNAME/host_components/DATANODE
     def host_component_delete(self,host,component):
@@ -75,6 +82,13 @@ class APIClient(object):
     #https://cwiki.apache.org/confluence/display/AMBARI/Using+APIs+to+delete+a+service+or+all+host+components+on+a+host
     #curl -u admin:admin -H "X-Requested-By: ambari" -X DELETE http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTERNAME/hosts/HOSTNAME
     def host_delete(self,host):
+        ret=False
+        for c in self.host_components(host):
+            ret=self.host_component_delete(host,c)
+            if ret.status_code != requests.codes.ok:
+                return ret
+        return self.request("/hosts/"+host,call_method=requests.delete)
+    def host_lost_delete(self,host):
         ret=False
         for c in self.host_components(host):
             ret=self.host_component_delete(host,c)
