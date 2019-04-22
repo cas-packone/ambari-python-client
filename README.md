@@ -1,2 +1,2 @@
 # Install
-pip install requests
+pip install packone-remedy
