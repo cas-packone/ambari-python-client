@@ -1,4 +1,5 @@
 import requests
+from threading import Thread
 import time
 
 class APIClient(object):
@@ -122,9 +123,11 @@ class APIClient(object):
         print('host_clone({},{})'.format(from_host,to_host))
         if not self.host_add(to_host): return False
         for c in self.host_components(from_host):
-            if not self.host_component_add(to_host,c):
-                return False
-        return True
+            Thread(
+                target=self.host_component_add,
+                args=(to_host,c)
+            ).start()
+        time.sleep(self.operation_interval)
     #https://cwiki.apache.org/confluence/display/AMBARI/Using+APIs+to+delete+a+service+or+all+host+components+on+a+host
     #curl -u admin:admin -H "X-Requested-By: ambari" -X DELETE http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTERNAME/hosts/HOSTNAME
     def host_delete(self,host):
