@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = "packone-remedy",
+    name = "pkone-remedy",
     version = "0.0.1",
     keywords = ("pip", "packone"),
     description = "Scripts to remedy vm images (of packone)",

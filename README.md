@@ -1,2 +1,2 @@
 # Install
-pip install packone-remedy
+pip install pk1-remedy
