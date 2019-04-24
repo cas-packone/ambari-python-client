@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name = "pk1-remedy",
-    version = "0.0.1",
+    version = "0.0.2",
     keywords = ("pip", "packone"),
     description = "Scripts to remedy vm images (of packone)",
-    long_description = open('README.md').read(),
+    long_description = open('README.rst').read(),
     license = "Apache-2.0 Licence",
     url = "https://github.com/cas-bigdatalab/packone_remedy",
     author = "Excel Wang",
@@ -16,7 +16,7 @@ setup(
     install_requires = ["requests"],
     entry_points = {
         'console_scripts': [
-            'ambari-host-clone = packone.remedy.ambari.host_clone:main'
+            'ambari-host-clone = pk1.remedy.ambari.host_clone:main'
         ]
     }
 )
