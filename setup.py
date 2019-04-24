@@ -7,11 +7,9 @@ setup(
     description = "Scripts to remedy vm images (of packone)",
     long_description = "Scripts to remedy vm images (of packone)",
     license = "Apache-2.0 Licence",
-
     url = "https://github.com/cas-bigdatalab/packone_remedy",
     author = "Excel Wang",
     author_email = "wanghj@cnic.com",
-
     packages = find_packages(),
     include_package_data = True,
     platforms = "any",
