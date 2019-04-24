@@ -1,2 +1,2 @@
 # Install
-pip install pk1-remedy
+pip install pkone-remedy
