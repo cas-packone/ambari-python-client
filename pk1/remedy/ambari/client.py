@@ -4,17 +4,19 @@ import time
 import sys
 
 class APIClient(object):
-    def __init__(self,url='http://localhost:8080',username='admin',passwd='admin',retry_interval=3,operation_interval=10,mustend=90):
+    def __init__(self,url='http://localhost:8080',username='admin',passwd='admin',operation_interval=10,retry_refused=False,retry_interval=3,retry_timeout=90):
         self.url=url+'/api/v1/clusters/'
         self.username=username
         self.passwd=passwd
-        self.retry_interval=retry_interval
+        if retry_interval: self.retry_interval=retry_interval
         self.operation_interval=operation_interval
-        self.mustend=mustend
+        self.retry_timeout=retry_timeout
+        self.retry_refused=retry_refused
         self.headers = {'X-Requested-By': 'ambari'}
         #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X GET http://localhost:8080/api/v1/clusters/
-        self.cluster_name=self.preflight()['items'][0]['Clusters']['cluster_name']
-    def request_raw(self,url='',data=None,call_method=None):
+        ret=self.check_raw() if self.retry_refused else self.request_raw()
+        self.cluster_name=ret['items'][0]['Clusters']['cluster_name']
+    def request_raw(self,url='',data=None,call_method=None,status_code=None):
         kwargs={
             'url':self.url+url,
             'headers':self.headers,
@@ -28,9 +30,6 @@ class APIClient(object):
             call_method=requests.get
         ret = call_method(**kwargs)
         print(call_method.__name__,self.url+url,ret)
-        return ret
-    def preflight(self,url='',data=None,call_method=None,status_code=None):
-        ret = self.request_raw(url,data,call_method)
         condition=status_code if status_code else requests.codes.ok
         if ret.status_code == condition:
             if ret.text:
@@ -39,17 +38,26 @@ class APIClient(object):
         else:
             ret=False
         return ret
-    def request(self,url='',data=None,call_method=None,status_code=None):
-        return self.preflight(self.cluster_name+url,data,call_method,status_code)
-    def check(self,url,data=None,call_method=None,retry_interval=None,mustend=None,status_code=None):
-        if not retry_interval: retry_interval=self.retry_interval
-        if not mustend: mustend=self.mustend
-        mustend = time.time() + mustend
+    def check_raw(self,url='',data=None,call_method=None,retry_timeout=None,status_code=None):
+        if not retry_timeout: retry_timeout=self.retry_timeout
+        mustend = time.time() + retry_timeout
         while time.time() < mustend:
-            ret=self.request(url,data=data,call_method=call_method,status_code=status_code)
-            if ret: return ret
-            time.sleep(retry_interval)
-        return False
+            try:
+                ret=self.
+                (url,data=data,call_method=call_method,status_code=status_code)
+            except requests.ConnectionError as ce:
+                if self.retry_refused:
+                    time.sleep(self.retry_interval)
+                else:
+                    raise ce
+            else:
+                if ret: return ret
+                time.sleep(self.retry_interval)
+        return ret
+    def request(self,url='',data=None,call_method=None,status_code=None):
+        return self.request_raw(self.cluster_name+url,data,call_method,status_code)
+    def check(self,url,data=None,call_method=None,retry_timeout=None,status_code=None):
+        return self.check_raw(self.cluster_name+url,data=data,call_method=call_method,status_code=status_code, retry_timeout=retry_timeout)
     #ref:https://community.hortonworks.com/answers/88215/view.html
     #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X PUT  -d '{"RequestInfo":{"context":"_PARSE_.START.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"emr"}},"Body":{"ServiceInfo":{"state":"STARTED"}}}' http://localhost:8080/api/v1/clusters/emr/services
     def service_start_all(self):
