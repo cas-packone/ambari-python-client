@@ -14,9 +14,9 @@ class APIClient(object):
         self.retry_refused=retry_refused
         self.headers = {'X-Requested-By': 'ambari'}
         #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X GET http://localhost:8080/api/v1/clusters/
-        ret=self.check_raw() if self.retry_refused else self.request_raw()
+        ret=self.check_raw(interval=False) if self.retry_refused else self.request_raw(interval=False)
         self.cluster_name=ret['items'][0]['Clusters']['cluster_name']
-    def request_raw(self,url='',data=None,call_method=None,status_code=None):
+    def request_raw(self,url='',data=None,call_method=None,status_code=None,interval=True):
         kwargs={
             'url':self.url+url,
             'headers':self.headers,
@@ -34,16 +34,16 @@ class APIClient(object):
         if ret.status_code == condition:
             if ret.text:
                 ret = ret.json()
-                time.sleep(self.operation_interval)
+                if interval: time.sleep(self.operation_interval)
         else:
             ret=False
         return ret
-    def check_raw(self,url='',data=None,call_method=None,retry_timeout=None,status_code=None):
+    def check_raw(self,url='',data=None,call_method=None,retry_timeout=None,status_code=None,interval=True):
         if not retry_timeout: retry_timeout=self.retry_timeout
         mustend = time.time() + retry_timeout
         while time.time() < mustend:
             try:
-                ret=self.request_raw(url,data=data,call_method=call_method,status_code=status_code)
+                ret=self.request_raw(url,data=data,call_method=call_method,status_code=status_code,interval=interval)
             except requests.ConnectionError as ce:
                 if self.retry_refused:
                     time.sleep(self.retry_interval)
@@ -53,10 +53,10 @@ class APIClient(object):
                 if ret: return ret
                 time.sleep(self.retry_interval)
         return ret
-    def request(self,url='',data=None,call_method=None,status_code=None):
-        return self.request_raw(self.cluster_name+url,data,call_method,status_code)
-    def check(self,url,data=None,call_method=None,retry_timeout=None,status_code=None):
-        return self.check_raw(self.cluster_name+url,data=data,call_method=call_method,status_code=status_code, retry_timeout=retry_timeout)
+    def request(self,url='',data=None,call_method=None,status_code=None,interval=True):
+        return self.request_raw(self.cluster_name+url,data,call_method,status_code,interval=interval)
+    def check(self,url,data=None,call_method=None,retry_timeout=None,status_code=None,interval=True):
+        return self.check_raw(self.cluster_name+url,data=data,call_method=call_method,status_code=status_code, retry_timeout=retry_timeout,interval=interval)
     #ref:https://community.hortonworks.com/answers/88215/view.html
     #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X PUT  -d '{"RequestInfo":{"context":"_PARSE_.START.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"emr"}},"Body":{"ServiceInfo":{"state":"STARTED"}}}' http://localhost:8080/api/v1/clusters/emr/services
     def service_start_all(self):
@@ -109,7 +109,8 @@ class APIClient(object):
     #curl -u admin:admin -X PUT -d '{"RequestInfo":{"context":"Stop Component"},"Body":{"HostRoles":{"state":"INSTALLED"}}}' http://AMBARI_SERVER_HOST:8080/api/v1/clusters/c1/hosts/HOSTNAME/host_components/COMPONENT_NAME
     def  host_component_stop(self, host, component):
         data='{"RequestInfo":{"context":"Stop Component"},"Body":{"HostRoles":{"state":"INSTALLED"}}}'
-        return self.request("/hosts/"+host+'/host_components/'+component,data)
+        url="/hosts/"+host+'/host_components/'+component
+        return self.check(url,data=data,status_code=200)
     #curl --user admin:admin -i -X POST http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTER_NAME/hosts/NEW_HOST_ADDED/host_components/DATANODE
     def host_component_add(self,host,component):
         url="/hosts/"+host+'/host_components/'+component
@@ -140,12 +141,8 @@ class APIClient(object):
     #curl -u admin:admin -H "X-Requested-By: ambari" -X DELETE http://AMBARI_SERVER_HOST:8080/api/v1/clusters/CLUSTERNAME/hosts/HOSTNAME
     def host_delete(self,host):
         print('host_delete({})'.format(host))
-        ret=False
         for c in self.host_components(host):
             self.host_component_stop(host,c)
             if not self.host_component_delete(host,c):
                 return False
-        url="/hosts/"+host
-        ret = self.check(url,call_method=requests.delete)
-        if ret: time.sleep(30)
-        return self.check(url,status_code=404)
+        return self.host_lost_delete(host)

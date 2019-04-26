@@ -17,6 +17,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'ambari-host-clone = pk1.remedy.ambari.host_clone:main',
+            'ambari-host-delete = pk1.remedy.ambari.host_delete:main',
             'ambari-service-start = pk1.remedy.ambari.service_start:main'
         ]
     }
