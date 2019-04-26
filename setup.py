@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "pk1-remedy",
-    version = "0.0.4",
+    version = "0.0.5",
     keywords = ("pip", "packone"),
     description = "Scripts to remedy vm images (of packone).",
     long_description = open('README.rst').read(),
