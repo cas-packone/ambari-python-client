@@ -43,8 +43,7 @@ class APIClient(object):
         mustend = time.time() + retry_timeout
         while time.time() < mustend:
             try:
-                ret=self.
-                (url,data=data,call_method=call_method,status_code=status_code)
+                ret=self.request_raw(url,data=data,call_method=call_method,status_code=status_code)
             except requests.ConnectionError as ce:
                 if self.retry_refused:
                     time.sleep(self.retry_interval)
