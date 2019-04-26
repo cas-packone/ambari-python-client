@@ -145,4 +145,6 @@ class APIClient(object):
             self.host_component_stop(host,c)
             if not self.host_component_delete(host,c):
                 return False
-        return self.host_lost_delete(host)
+        url="/hosts/"+host
+        self.check(url,call_method=requests.delete)
+        return self.check(url,status_code=404,interval=False)
