@@ -5,7 +5,7 @@ import sys
 
 class APIClient(object):
     def __init__(self,url='http://localhost:8080',username='admin',passwd='admin',operation_interval=10,retry_refused=False,retry_interval=3,retry_timeout=90):
-        self.url=url+'/api/v1/clusters/'
+        self.url=url+'/api/v1'
         self.username=username
         self.passwd=passwd
         if retry_interval: self.retry_interval=retry_interval
@@ -14,8 +14,8 @@ class APIClient(object):
         self.retry_refused=retry_refused
         self.headers = {'X-Requested-By': 'ambari'}
         #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X GET http://localhost:8080/api/v1/clusters/
-        ret=self.check_raw(interval=False) if self.retry_refused else self.request_raw(interval=False)
-        self.cluster_name=ret['items'][0]['Clusters']['cluster_name']
+        method=self.check_raw if self.retry_refused else self.request_raw
+        self.cluster_name=method(url='/clusters/',interval=False)['items'][0]['Clusters']['cluster_name']
     def request_raw(self,url='',data=None,call_method=None,status_code=None,interval=True):
         kwargs={
             'url':self.url+url,
@@ -53,10 +53,24 @@ class APIClient(object):
                 if ret: return ret
                 time.sleep(self.retry_interval)
         return ret
+    def stack_latest_version(self,stack_name='HDP'):
+        return self.request_raw("/stacks/{}".format(stack_name),interval=False)['versions'][-1]['Versions']['stack_version']
+    def stack_services(self,stack_name='HDP',version=None):
+        if not version: version=self.stack_latest_version(stack_name=stack_name)
+        srvs=[]
+        for s in self.request_raw("/stacks/{}/versions/{}".format(stack_name,version),interval=False)['services']:
+            srvs.append(s['StackServices']['service_name'])
+        return srvs
+    def stack_service_components(self,service_name,stack_name='HDP',version=None):
+        if not version: version=self.stack_latest_version(stack_name=stack_name)
+        cpns=[]
+        for cpn in self.request_raw("/stacks/{}/versions/{}/services/{}".format(stack_name,version,service_name),interval=False)['components']:
+            cpns.append(cpn['StackServiceComponents']['component_name'])
+        return cpns
     def request(self,url='',data=None,call_method=None,status_code=None,interval=True):
-        return self.request_raw(self.cluster_name+url,data,call_method,status_code,interval=interval)
+        return self.request_raw('/clusters/'+self.cluster_name+url,data,call_method,status_code,interval=interval)
     def check(self,url,data=None,call_method=None,retry_timeout=None,status_code=None,interval=True):
-        return self.check_raw(self.cluster_name+url,data=data,call_method=call_method,status_code=status_code, retry_timeout=retry_timeout,interval=interval)
+        return self.check_raw('/clusters/'+self.cluster_name+url,data=data,call_method=call_method,status_code=status_code, retry_timeout=retry_timeout,interval=interval)
     #ref:https://community.hortonworks.com/answers/88215/view.html
     #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X PUT  -d '{"RequestInfo":{"context":"_PARSE_.START.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"emr"}},"Body":{"ServiceInfo":{"state":"STARTED"}}}' http://localhost:8080/api/v1/clusters/emr/services
     def service_start_all(self):

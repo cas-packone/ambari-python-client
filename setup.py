@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "pk1-remedy",
-    version = "0.0.5",
+    version = "0.0.6",
     keywords = ("pip", "packone"),
     description = "Scripts to remedy vm images (of packone).",
     long_description = open('README.rst').read(),
@@ -16,6 +16,7 @@ setup(
     install_requires = ["requests"],
     entry_points = {
         'console_scripts': [
+            'ambari-stack-list = pk1.remedy.ambari.stack:main',
             'ambari-host-clone = pk1.remedy.ambari.host_clone:main',
             'ambari-host-delete = pk1.remedy.ambari.host_delete:main',
             'ambari-service-start = pk1.remedy.ambari.service_start:main'
