@@ -55,17 +55,24 @@ class APIClient(object):
         return ret
     def stack_latest_version(self,stack_name='HDP'):
         return self.request_raw("/stacks/{}".format(stack_name),interval=False)['versions'][-1]['Versions']['stack_version']
+    def stack_service(self,service_name,stack_name='HDP',version=None):
+        if not version: version=self.stack_latest_version(stack_name=stack_name)
+        return self.request_raw("/stacks/{}/versions/{}/services/{}".format(stack_name,version,service_name),interval=False)
     def stack_services(self,stack_name='HDP',version=None):
         if not version: version=self.stack_latest_version(stack_name=stack_name)
         srvs=[]
         for s in self.request_raw("/stacks/{}/versions/{}".format(stack_name,version),interval=False)['services']:
-            srvs.append(s['StackServices']['service_name'])
+            srvs.append(self.stack_service(s['StackServices']['service_name'],stack_name,version))
         return srvs
+    def stack_service_component(self,service_name,component_name,stack_name='HDP',version=None):
+        if not version: version=self.stack_latest_version(stack_name=stack_name)
+        cpns=[]
+        return self.request_raw("/stacks/{}/versions/{}/services/{}/components/{}".format(stack_name,version,service_name,component_name),interval=False)
     def stack_service_components(self,service_name,stack_name='HDP',version=None):
         if not version: version=self.stack_latest_version(stack_name=stack_name)
         cpns=[]
         for cpn in self.request_raw("/stacks/{}/versions/{}/services/{}".format(stack_name,version,service_name),interval=False)['components']:
-            cpns.append(cpn['StackServiceComponents']['component_name'])
+            cpns.append(self.stack_service_component(service_name,cpn['StackServiceComponents']['component_name'],stack_name,version))
         return cpns
     def request(self,url='',data=None,call_method=None,status_code=None,interval=True):
         return self.request_raw('/clusters/'+self.cluster_name+url,data,call_method,status_code,interval=interval)
