@@ -13,6 +13,7 @@ class APIClient(object):
         self.retry_timeout=retry_timeout
         self.retry_refused=retry_refused
         self.headers = {'X-Requested-By': 'ambari'}
+        self._cluster_name=None
         #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X GET http://localhost:8080/api/v1/clusters/
     @property
     def cluster_name(self):
