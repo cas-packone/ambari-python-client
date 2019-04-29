@@ -14,8 +14,12 @@ class APIClient(object):
         self.retry_refused=retry_refused
         self.headers = {'X-Requested-By': 'ambari'}
         #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X GET http://localhost:8080/api/v1/clusters/
-        method=self.check_raw if self.retry_refused else self.request_raw
-        self.cluster_name=method(url='/clusters/',interval=False)['items'][0]['Clusters']['cluster_name']
+    @property
+    def cluster_name(self):
+        if not self._cluster_name:
+            method=self.check_raw if self.retry_refused else self.request_raw
+            self._cluster_name=method(url='/clusters/',interval=False)['items'][0]['Clusters']['cluster_name']
+        return self._cluster_name
     def request_raw(self,url='',data=None,call_method=None,status_code=None,interval=True):
         kwargs={
             'url':self.url+url,
