@@ -87,7 +87,7 @@ class APIClient(object):
     #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X PUT  -d '{"RequestInfo":{"context":"_PARSE_.START.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"emr"}},"Body":{"ServiceInfo":{"state":"STARTED"}}}' http://localhost:8080/api/v1/clusters/emr/services
     def service_start_all(self):
         data='{"RequestInfo":{"context":"_PARSE_.START.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"'+self.cluster_name+'"}},"Body":{"ServiceInfo":{"state":"STARTED"}}}'
-        return self.request("/services",data)
+        return self.check("/services",data,status_code=202)
     #ref:https://community.hortonworks.com/answers/88215/view.html
     #curl -i -u admin:admin -H "X-Requested-By: ambari"  -X PUT  -d '{"RequestInfo":{"context":"_PARSE_.STOP.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"emr"}},"Body":{"ServiceInfo":{"state":"INSTALLED"}}}'  http://localhost:8080/api/v1/clusters/emr/services
     def service_stop_all(self):
@@ -105,7 +105,7 @@ class APIClient(object):
     def service_start(self,service_name=None):
         if not service_name: return self.service_start_all()
         data='{"RequestInfo": {"context" :"Start service"}, "Body": {"ServiceInfo": {"state": "STARTED"}}}'
-        return self.request("/services/"+service_name,data)
+        return self.check("/services/"+service_name,data,status_code=202)
     #curl -u admin:passwd  -H 'X-Requested-By: ambari' -X PUT -d '{"RequestInfo": {"context" :"Stop service "}, "Body": {"ServiceInfo": {"state": "INSTALLED"}}}' http://<AMBARI_SERVER_HOSTNAME>:8080/api/v1/clusters/<CLUSTER_NAME>/services/<Service_name>
     def service_stop(self,service_name=None):
         if not service_name: return self.service_stop_all()
