@@ -16,7 +16,7 @@ setup(
     install_requires = ["requests"],
     entry_points = {
         'console_scripts': [
-            'ambari = pk1.remedy.ambari.cmd:run',
+            'ambari = ambari.cmd:run',
         ]
     }
 )
