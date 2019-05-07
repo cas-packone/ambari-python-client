@@ -7,7 +7,7 @@ setup(
     description = "Amabri python client based on ambari rest api.",
     long_description = open('README.rst').read(),
     license = "Apache-2.0 Licence",
-    url = "https://github.com/cas-bigdatalab/packone_remedy",
+    url = "https://github.com/cas-bigdatalab/packone-remedy",
     author = "Excel Wang",
     author_email = "wanghj@cnic.com",
     packages = find_packages(),
