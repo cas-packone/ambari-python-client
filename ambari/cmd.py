@@ -19,7 +19,7 @@ def run():
     func()
 
 def host_clone():
-    client.cluster.clone_host(from_h=args.opts[0],to_h=args.opts[1])
+    client.cluster.clone_host(from_host_name=args.opts[0],to_host_name=args.opts[1])
 
 def host_remove():
     client.cluster.remove_host(host_name=args.opts[0])
@@ -35,7 +35,7 @@ def service_stop():
         client.cluster.get_service(service_name=args.opts[0]).stop()
     else:
         client.cluster.stop()
-        
+
 def service_list():
     for s in client.cluster.services:
         print(s.name)
