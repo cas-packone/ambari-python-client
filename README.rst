@@ -10,9 +10,9 @@ Command line
 ===================
 ambari -h
 
-ambari http://localhost:8080 service start ZOOKEEPER
+ambari localhost:8080 service start ZOOKEEPER
 
-ambari http://localhost:8080 host remove server2
+ambari localhost:8080 host remove server2
 
 ===================
 Python modular
