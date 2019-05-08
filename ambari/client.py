@@ -234,7 +234,7 @@ class ClusterService(object):
         return self.cluster.client.check(self.url,data,status_code=202,wait=True)
     def stop(self):
         data='{"RequestInfo": {"context" :"Stop service"}, "Body": {"ServiceInfo": {"state": "INSTALLED"}}}'
-        return self.cluster.client.request(self.url,data,wait=True)
+        return self.cluster.client.check(self.url,data,wait=True)
 
 class ClusterServiceComponent(object):
     def __init__(self,service,name):
