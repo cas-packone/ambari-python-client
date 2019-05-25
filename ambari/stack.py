@@ -134,7 +134,7 @@ class Stack(object):
     }
     service_groups={
         'minimal': ['HDFS','ZOOKEEPER','YARN','MAPREDUCE2'],
-        'typical': ['HDFS','ZOOKEEPER','YARN','MAPREDUCE2', 'AMBARI_INFRA_SOLR', 'AMBARI_METRICS', 'HBASE', 'SPARK2' , 'PIG', 'ZEPPELIN'],
+        'typical': ['HDFS','ZOOKEEPER','YARN','MAPREDUCE2', 'AMBARI_INFRA_SOLR', 'AMBARI_METRICS', 'HBASE', 'PIG'],
         'all': [key for key in topology]
     }
     @property
