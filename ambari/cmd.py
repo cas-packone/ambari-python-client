@@ -18,21 +18,35 @@ def run():
     func=globals()['{}_{}'.format(args.target[0],args.action[0])]
     func()
 
-def host_clone():
-    client.cluster.clone_host(from_host_name=args.opts[0],to_host_name=args.opts[1])
+def cluster_create():
+    (name,size)=args.opts[0:2]
+    hosts=args.opts[2:]
+    blueprint=getattr(client.stack, 'register_blueprint_{}'.format(size))()
+    client.create_cluster(name,hosts=hosts,blueprint=blueprint)
 
-def host_remove():
-    client.cluster.remove_host(host_name=args.opts[0])
+def cluster_create_from_vdf():
+    (VDF_url,name,size)=args.opts[0:3]
+    hosts=args.opts[3:]
+    blueprint=getattr(client.stack, 'register_blueprint_{}'.format(size))()
+    client.create_cluster(name,hosts=hosts,blueprint=blueprint,VDF_url=VDF_url)
+
+def host_clone():
+    from_h=client.cluster.get_host(args.opts[0])
+    to_h=client.cluster.get_host(args.opts[1])
+    to_h.clone(from_h)
+
+def host_delete():
+    client.cluster.get_host(args.opts[0]).delete()
 
 def service_start():
     if args.opts:
-        client.cluster.get_service(service_name=args.opts[0]).start()
+        client.cluster.get_service(name=args.opts[0]).start()
     else:
         client.cluster.start()
 
 def service_stop():
     if args.opts:
-        client.cluster.get_service(service_name=args.opts[0]).stop()
+        client.cluster.get_service(name=args.opts[0]).stop()
     else:
         client.cluster.stop()
 
