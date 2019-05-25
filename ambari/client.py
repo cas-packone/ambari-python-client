@@ -128,7 +128,7 @@ class Client(object):
         l=len(blueprint.info['host_groups'])
         for hgi in range(l):
             hg=blueprint.info['host_groups'][hgi]
-            host_groups.append({'name': hg['name'], "hosts" :[{"fqdn" : hosts['hgi']}]})
+            host_groups.append({'name': hg['name'], "hosts" :[{"fqdn" : hosts[hgi]}]})
         for h in hosts[l:]:
             host_groups[-1]['hosts'].append({"fqdn" : h})
         data = {
