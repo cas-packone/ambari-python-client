@@ -10,9 +10,11 @@ Command line
 ===================
 ambari -h
 
+ambari localhost:8080 cluster create test typical_triple master1 master2 slave
+
 ambari localhost:8080 service start ZOOKEEPER
 
-ambari localhost:8080 host remove server2
+ambari localhost:8080 host delete server2
 
 ===================
 Python modular
