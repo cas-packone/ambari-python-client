@@ -126,9 +126,12 @@ class Client(object):
         if not blueprint: blueprint=stack.blueprint
         host_groups=[]
         l=len(blueprint.info['host_groups'])
-        for hgi in range(l):
-            hg=blueprint.info['host_groups'][hgi]
-            host_groups.append({'name': hg['name'], "hosts" :[{"fqdn" : hosts[hgi]}]})
+        if l==1:
+            hg_names=['master']
+        else:
+            hg_names=['master1','master2','slave']
+        for ni in range(l):
+            host_groups.append({'name': hg_names[ni], "hosts" :[{"fqdn" : hosts[ni]}]})
         for h in hosts[l:]:
             host_groups[-1]['hosts'].append({"fqdn" : h})
         data = {
