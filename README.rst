@@ -1,4 +1,4 @@
-Amabri python client based on ambari rest api.
+Ambari python client based on ambari rest api.
 
 ===================
 Install
