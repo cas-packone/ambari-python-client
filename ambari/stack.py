@@ -28,12 +28,14 @@ class Stack(object):
                 if c.name==name:
                     return c
         return None
+    
+
     @property
     def version_definition(self):
         for v in self.client.version_definitions:
             if v.stack==self: return v
         return None
-    topology={
+    topology={                                                                            
         'ZOOKEEPER':{
             'host_groups': {'slave': ['ZOOKEEPER_SERVER'], 'client': ['ZOOKEEPER_CLIENT']}
         },
@@ -228,6 +230,7 @@ class Service(object):
         self._components=None
         self._categories=None
         self._dependencies=None
+        self._quicklinks=None
     @property
     def info(self):
         if not self._info:
@@ -240,6 +243,24 @@ class Service(object):
             for cpn in self.info['components']:
                 self._components.append(Component(service=self,name=cpn['StackServiceComponents']['component_name']))
         return self._components
+    def get_component(self,name):
+        for c in self.components:
+            if c.name==name:
+                return c
+        return None
+    @property
+    def quicklinks(self):
+        if self._quicklinks is None:
+            self._quicklinks=[]
+            quick_info=self.stack.client._request(self.info['quicklinks'][0]['href'])['QuickLinkInfo']['quicklink_data']['QuickLinksConfiguration']['configuration']['links']
+            for link in quick_info:
+                self._quicklinks.append(Quicklink(
+                    component=self.get_component(link['component_name']),
+                    url="http"+link['url'].split("%@")[1]+"%@"+link['url'].split("%@")[2]+link['port']['http_default_port']+link['url'].split("%@")[3],
+                    name=link['name'],
+                    http_default_port=link['port']['http_default_port']
+                ))
+        return self._quicklinks
     @property
     def categories(self):
         if self._categories is None:
@@ -299,3 +320,14 @@ class Component(object):
             for d in self.info['dependencies']:
                 self._dependencies.append(self.service.stack.get_component(d['Dependencies']['component_name']))
         return self._dependencies
+        
+class Quicklink(object):
+    def __init__(self,component,name,url,http_default_port):
+        self.component=component
+        self.name=name
+        self.url=url
+        self.http_default_port=http_default_port
+        
+    
+
+

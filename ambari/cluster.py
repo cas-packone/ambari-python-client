@@ -100,6 +100,22 @@ class Service(object):
         for c in self.info['components']:
             cs.append(ServiceComponent(service=self,name=c['ServiceComponentInfo']['component_name']))
         return cs
+    def get_component(self,name):
+        for c in self.components:
+            if c.name==name:
+                return c
+        return None                     
+    @property
+    def quicklinks(self):
+        qs=[]      
+        for q in self.cluster.stack.get_service(self.name).quicklinks:  
+            for c in self.components:
+                if q.component.name == c.name: 
+                    qs.append(QuickUrl(
+                        component=self.get_component(q.component.name),
+                        url=q.url.replace("%@",c.host_components[-1].host.name)
+                    ))
+        return qs 
     @property
     def status(self):
         return self.cluster.client.get(self.url+'?fields=ServiceInfo/state')['ServiceInfo']['state']
@@ -205,3 +221,9 @@ class HostComponent(object):
         if self.status=='STARTED':
             self.stop()
         return self.host.cluster.client.delete(self.url)
+class QuickUrl(object):  
+    def __init__(self,component,url):
+        self.component=component
+        self.url=url
+        
+        
