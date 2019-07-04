@@ -237,6 +237,9 @@ class Service(object):
             self._info=self.stack.client.get(self.url)
         return self._info
     @property
+    def description(self):
+        return self.info['StackServices']['comments']
+    @property
     def components(self):
         if self._components is None:
             self._components=[]
