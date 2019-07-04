@@ -163,7 +163,7 @@ class Host(object):
         return self.cluster.client.get(self.url)
     @property
     def metrics(self):
-        return self.info['metrics']
+        return self.cluster.client.get(self.url+'?fields=metrics')
     @property
     def components(self):
         if 'host_components' not in self.info: return ()
