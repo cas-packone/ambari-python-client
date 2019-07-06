@@ -79,12 +79,52 @@ class Request(object):
         self.cluster=cluster
         self.id=id
         self.url=self.cluster.url+"/requests/{}".format(self.id)
+        self._tasks=None
+        self._info=None
+        self._description=None
+    def __str__(self):
+        return 'req {} || {} || {}'.format(self.id, self.description, self.status)
     @property
     def info(self):
-        return self.cluster.client.get(self.url)
+        inf=self.cluster.client.get(self.url) if not self._info else self._info
+        if not self._info and inf['Requests']['request_status'] not in ['IN_PROGRESS', 'PENDING']:
+            self._info=inf
+        return inf
     @property
     def status(self):
         return self.info['Requests']['request_status']
+    @property
+    def description(self):
+        return self.info['Requests']['request_context']
+    @property
+    def tasks(self):
+        if not self._tasks:
+            self._tasks=[]
+        for t in self.info['tasks']:
+            self._tasks.append(Task(self, t['Tasks']['id']))
+        return self._tasks
+
+class Task(object):
+    def __init__(self,request,id):
+        self.request=request
+        self.id=id
+        self.url=self.request.url+"/tasks/{}".format(self.id)
+        self._info=None
+        self._description=None
+    def __str__(self):
+        return 'req: {} || tsk: {} || {} || {}'.format(self.request.id, self.id, self.description, self.status)
+    @property
+    def info(self):
+        inf=self.request.cluster.client.get(self.url) if not self._info else self._info
+        if not self._info and inf['Tasks']['status'] not in ['IN_PROGRESS', 'PENDING']:
+            self._info=inf
+        return inf
+    @property
+    def status(self):
+        return self.info['Tasks']['status']
+    @property
+    def description(self):
+        return self.info['Tasks']['command_detail']
 
 class Service(object):
     def __init__(self,cluster,name):

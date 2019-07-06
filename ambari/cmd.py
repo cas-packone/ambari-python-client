@@ -4,7 +4,7 @@ from .client import Client
 parser = argparse.ArgumentParser(description='ambari cmd line.')
 parser.add_argument('server', metavar='S', nargs=1,
                     help='the ambari server host:port to connect.')
-parser.add_argument('target', choices=['stack', 'cluster', 'host', 'service'], metavar='T', nargs=1,
+parser.add_argument('target', choices=['stack', 'cluster', 'host', 'service', 'request'], metavar='T', nargs=1,
                     help='the target resource to perform an action on.')
 parser.add_argument('action', metavar='A', nargs=1,
                     help='the action to be performed on the target resource.')
@@ -55,3 +55,10 @@ def service_stop():
 def service_list():
     for s in client.cluster.services:
         print(s.name)
+
+def request_list():
+    for r in reversed(client.cluster.requests):
+        print(r)
+        for t in r.tasks:
+            print(t)
+        if r.status not in ['IN_PROGRESS', 'PENDING']: break
