@@ -82,6 +82,9 @@ class Request(object):
     @property
     def info(self):
         return self.cluster.client.get(self.url)
+    @property
+    def status(self):
+        return self.info['Requests']['request_status']
 
 class Service(object):
     def __init__(self,cluster,name):
