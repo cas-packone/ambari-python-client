@@ -58,7 +58,7 @@ class Client(object):
                 if 'Requests' in ret and 'status' in ret['Requests']:
                     while True:
                         time.sleep(self.retry_interval)
-                        if self._request(ret['href'])['Requests']['request_status']=='COMPLETED':
+                        if self._request(ret['href'])['Requests']['request_status']!='IN_PROGRESS':
                             break
                 return ret
         raise ce
