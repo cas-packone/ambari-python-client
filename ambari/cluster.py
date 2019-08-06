@@ -59,11 +59,11 @@ class Cluster(object):
                 return s
         return None
     def start(self):
-        data='{"RequestInfo":{"context":"_PARSE_.START.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"'+self.name+'"}},"Body":{"ServiceInfo":{"state":"STARTED"}}}'
+        data={"RequestInfo":{"context":"_PARSE_.START.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"'+self.name+'"}},"Body":{"ServiceInfo":{"state":"STARTED"}}}
         return self.client.put(self.url+"/services",data,status_code=202)
     def stop(self):
-        data='{"RequestInfo":{"context":"_PARSE_.STOP.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"'+self.name+'"}},"Body":{"ServiceInfo":{"state":"INSTALLED"}}}'
-        return self.client.put(self.url+"/services",data)
+        data={"RequestInfo":{"context":"_PARSE_.STOP.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"'+self.name+'"}},"Body":{"ServiceInfo":{"state":"INSTALLED"}}}
+        return self.client.put(self.url+"/services",data,status_code=202)
     def add_hosts(self,host_groups):
         data=[]
         for hname in host_groups:
