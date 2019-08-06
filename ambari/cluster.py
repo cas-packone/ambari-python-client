@@ -169,7 +169,7 @@ class Service(object):
         return self.cluster.client.put(self.url,data,status_code=202)
     def stop(self):
         data={"RequestInfo": {"context" :"Stop service"}, "Body": {"ServiceInfo": {"state": "INSTALLED"}}}
-        return self.cluster.client.put(self.url,data)
+        return self.cluster.client.put(self.url,data,status_code=202)
     @property
     def maintenance_status(self):
         return self.info['ServiceInfo']['maintenance_state']
