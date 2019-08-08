@@ -21,16 +21,12 @@ def run():
 def cluster_create():
     (name,size)=args.opts[0:2]
     hosts=args.opts[2:]
-    if client.stack.blueprint: client.stack.blueprint.delete()
-    blueprint=getattr(client.stack, 'register_blueprint_{}'.format(size))()
-    client.create_cluster(name,hosts=hosts,blueprint=blueprint)
+    client.create_cluster(name,hosts=hosts,size=size)
 
 def cluster_create_from_vdf():
     (VDF_url,name,size)=args.opts[0:3]
     hosts=args.opts[3:]
-    if client.stack.blueprint: client.stack.blueprint.delete()
-    blueprint=getattr(client.stack, 'register_blueprint_{}'.format(size))()
-    client.create_cluster(name,hosts=hosts,blueprint=blueprint,VDF_url=VDF_url)
+    client.create_cluster(name,hosts=hosts,VDF_url=VDF_url,size=size)
 
 def host_clone():
     from_h=client.cluster.get_host(args.opts[0])

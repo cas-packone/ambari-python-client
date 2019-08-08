@@ -57,7 +57,7 @@ class Client(object):
                 if self.footprint: print(call_method.__name__,url,response.status_code)
                 if 'Requests' in ret and 'status' in ret['Requests']:
                     while True:
-                        time.sleep(self.retry_interval)
+                        time.sleep(self.retry_interval*2)
                         if self._request(ret['href'])['Requests']['request_status']!='IN_PROGRESS':
                             break
                 return ret
@@ -121,9 +121,14 @@ class Client(object):
     @property
     def cluster(self):
         return self.clusters[-1]
-    def create_cluster(self, name, hosts, stack=None, blueprint=None, VDF_url=None):
-        if not stack: stack=self.stack
-        if not blueprint: blueprint=stack.blueprint
+    def create_cluster(self, name, hosts, VDF_url=None, size='typical_triple'):
+        if VDF_url:
+            version_definition = self.register_version_definition(VDF_url)
+            stack=version_definition.stack
+        else:
+            stack=self.stack
+            version_definition=stack.version_definition
+        blueprint=getattr(stack, 'register_blueprint_{}'.format(size))()
         host_groups=[]
         l=len(blueprint.info['host_groups'])
         if l==1:
@@ -136,12 +141,9 @@ class Client(object):
             host_groups[-1]['hosts'].append({"fqdn" : h})
         data = {
             "blueprint" : blueprint.name,
-            "host_groups" : host_groups
+            'host_groups': host_groups
         }
-        version_definition = self.register_version_definition(VDF_url) if VDF_url else stack.version_definition
-        if version_definition:
-            if version_definition.stack!=stack: raise Exception('mismatch vdf and stack')
-            data['repository_version_id']=version_definition.id
+        if version_definition: data["repository_version_id"]=version_definition.id
         c=Cluster(client=self, name=name)
         self.create(c.url,data=data,status_code=202)
         return c
