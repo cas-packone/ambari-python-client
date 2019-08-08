@@ -3,7 +3,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ambari.client import Client
 
-c=Client('http://172.31.10.75:8080')
+c=Client('http://10.0.88.170:8080')
 # c.cluster.delete()
 # c.stack.blueprint.delete()
 # c.stack.register_blueprint_typical_triple()
@@ -12,4 +12,7 @@ c=Client('http://172.31.10.75:8080')
 #     print(r)
 #     for t in r.tasks:
 #         print(t)
-print(c.cluster.services[-1].start())
+# print(c.cluster.services[-1].start())
+# print(c.cluster.start())
+print(c.cluster.start())
+# print(c.cluster.services[-3].stop())

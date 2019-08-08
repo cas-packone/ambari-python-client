@@ -9,7 +9,7 @@ class Cluster(object):
         self.url='/clusters/'+name
     def delete(self):
         for h in self.hosts:
-            h.remove()
+            h.delete()
         return self.client.delete(self.url)
     @property
     def requests(self):
