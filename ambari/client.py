@@ -108,10 +108,12 @@ class Client(object):
             vs.append(VersionDefinition(client=self,id=v['VersionDefinition']['id']))
         return vs
     def register_version_definition(self, url):
+        for v in self.version_definitions:
+            if v.version_url==url:
+                return v
         ret = self.create('/version_definitions',data={"VersionDefinition": {"version_url": url}})
         id=ret["resources"][0]['VersionDefinition']['id']
-        for v in self.version_definitions:
-            if v.id==id: return v
+        return VersionDefinition(self, id)
     @property
     def clusters(self):
         cs=[]
@@ -156,6 +158,9 @@ class VersionDefinition(object):
     @property
     def info(self):
         return self.client.get(self.url)
+    @property
+    def version_url(self):
+        return self.info['VersionDefinition']['version_url']
     @property
     def stack(self):
         name=self.info['VersionDefinition']['stack_name']
