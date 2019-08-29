@@ -65,8 +65,8 @@ class Client(object):
                             break
                 return ret
         raise Exception('timeout',call_method.__name__,url)
-    def get(self,url):
-        return self._request(self.url+url)
+    def get(self,url,status_code=None,bad_code_retry=False):
+        return self._request(self.url+url,status_code=status_code,bad_code_retry=bad_code_retry)
     def put(self,url,data,status_code=None,bad_code_retry=False):
         return self._request(self.url+url,data=data,status_code=status_code,bad_code_retry=bad_code_retry)
     def create(self,url,data=None,status_code=201,bad_code_retry=False):

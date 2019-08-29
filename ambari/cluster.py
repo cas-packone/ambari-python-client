@@ -2,7 +2,6 @@ class Cluster(object):
     def __init__(self,client,name):
         self._info=None
         self._stack=None
-        self._hosts=None
         self._services=None
         self.client=client
         self.name=name
@@ -43,10 +42,9 @@ class Cluster(object):
         return self._services
     @property
     def hosts(self):
-        if self._hosts is None:
-            self._hosts=[]
-            for h in self.info['hosts']:
-                self._hosts.append(Host(cluster=self,name=h['Hosts']['host_name']))
+        self._hosts=[]
+        for h in self.info['hosts']:
+            self._hosts.append(Host(cluster=self,name=h['Hosts']['host_name']))
         return self._hosts
     def get_host(self,name):
         for h in self.hosts:
@@ -215,19 +213,14 @@ class Host(object):
             cmpns.append(HostComponent(host=self,name=c['HostRoles']['component_name']))
         return cmpns
     def register(self):
-        self.cluster.client.create(self.url)
-        self.cluster._hosts.append(self)
+        self.cluster.client.create(self.url, bad_code_retry=True)
     def delete(self):
         for c in self.components:
             c.delete()
         self.cluster.client.delete(self.url)
-        self.cluster._hosts.remove(self)
     def clone(self,from_host):
-        print('host_clone({},{})'.format(from_host.name,self.host.name))
-        self.register()
         for c in from_host.components:
-            cpn=HostComponent(host=self, name=c.name)
-            Thread(target=cpn.install).start()
+            HostComponent(host=self, name=c.name).install()
 
 class HostComponent(object):
     def __init__(self,host,name):
@@ -252,10 +245,9 @@ class HostComponent(object):
     @property
     def service_name(self):
         return self.info['HostRoles']['service_name']
-    @property
     def install(self):
         self.host.cluster.client.create(self.url)
-        data={"RequestInfo":{"context":"Install '+self.name+'","operation_level":{"level":"HOST_COMPONENT","cluster_name":"'+self.host.cluster.name+'","host_name":"'+self.host.name+'","service_name":"'+self.service_name+'"}},"Body":{"HostRoles":{"state":"INSTALLED"}}}
+        data={"RequestInfo":{"context":"Install "+self.name,"operation_level":{"level":"HOST_COMPONENT","cluster_name":self.host.cluster.name,"host_name":self.host.name,"service_name":self.service_name}},"Body":{"HostRoles":{"state":"INSTALLED"}}}
         return self.host.cluster.client.put(self.url,data=data,status_code=202)
     def start(self):
         data={"RequestInfo": {"context" :"Start Component"}, "Body": {"HostRoles": {"state": "STARTED"}}}

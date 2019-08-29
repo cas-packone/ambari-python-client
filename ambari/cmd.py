@@ -1,5 +1,6 @@
 import argparse
 from .client import Client
+from .cluster import Host
 
 parser = argparse.ArgumentParser(description='ambari cmd line.')
 parser.add_argument('server', metavar='S', nargs=1,
@@ -30,7 +31,8 @@ def cluster_create_from_vdf():
 
 def host_clone():
     from_h=client.cluster.get_host(args.opts[0])
-    to_h=client.cluster.get_host(args.opts[1])
+    to_h=Host(client.cluster,args.opts[1])
+    to_h.register()
     to_h.clone(from_h)
 
 def host_delete():

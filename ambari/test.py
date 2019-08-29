@@ -2,9 +2,15 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ambari.client import Client
+from ambari.cluster import Host
 
 c=Client('http://172.31.10.184:8080')
-c.cluster.start()
+# c.cluster.start()
+from_h=c.cluster.get_host('slave.scispace')
+to_h=Host(c.cluster,'slave2.scispace')
+to_h.delete()
+to_h.register()
+to_h.clone(from_h)
 # for vd in c.version_definitions: vd.delete()
 # for blp in c.blueprints: blp.delete()
 # # c.stack.blueprint.delete()
