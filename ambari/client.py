@@ -24,7 +24,7 @@ class Client(object):
         self.footprint=footprint
         self._stacks=None
     #curl -u admin:passwd  -H 'X-Requested-By: ambari' -X PUT -d '{"RequestInfo": {"context" :"Stop service "}, "Body": {"ServiceInfo": {"state": "INSTALLED"}}}' http://<AMBARI_SERVER_HOSTNAME>:8080/api/v1/clusters/<CLUSTER_NAME>/services/<Service_name>
-    def _request(self,url,data=None,call_method=None,status_code=None):
+    def _request(self,url,data=None,call_method=None,status_code=None,bad_code_retry=False):
         kwargs={
             'url':url,
             'headers': {'X-Requested-By': 'ambari'},
@@ -53,6 +53,9 @@ class Client(object):
                     ret = {}
                 condition=status_code if status_code else requests.codes.ok
                 if response.status_code != condition:
+                    if bad_code_retry:
+                        time.sleep(self.retry_interval)
+                        continue
                     raise Exception('{} {} {}: {}'.format(call_method.__name__,url,response.status_code,ret))
                 if self.footprint: print(call_method.__name__,url,response.status_code)
                 if 'Requests' in ret and 'status' in ret['Requests']:
@@ -61,13 +64,13 @@ class Client(object):
                         if self._request(ret['href'])['Requests']['request_status']!='IN_PROGRESS':
                             break
                 return ret
-        raise ce
+        raise Exception('timeout',call_method.__name__,url)
     def get(self,url):
         return self._request(self.url+url)
-    def put(self,url,data,status_code=None):
-        return self._request(self.url+url,data=data,status_code=status_code)
-    def create(self,url,data=None,status_code=201):
-        return self._request(self.url+url,data=data,call_method=requests.post,status_code=status_code)
+    def put(self,url,data,status_code=None,bad_code_retry=False):
+        return self._request(self.url+url,data=data,status_code=status_code,bad_code_retry=bad_code_retry)
+    def create(self,url,data=None,status_code=201,bad_code_retry=False):
+        return self._request(self.url+url,data=data,call_method=requests.post,status_code=status_code,bad_code_retry=bad_code_retry)
     def delete(self,url):
         return self._request(self.url+url,call_method=requests.delete)
     @property
