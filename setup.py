@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "ambari",
-    version = "0.1.4",
+    version = "0.1.5",
     keywords = ("pip", "ambari", "packone"),
     description = "Amabri python client based on ambari rest api.",
     long_description = open('README.rst').read(),
