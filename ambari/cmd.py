@@ -43,6 +43,7 @@ def service_start():
         client.cluster.get_service(name=args.opts[0]).start()
     else:
         client.cluster.start()
+        client.cluster.restart_required()
 
 def service_stop():
     if args.opts:

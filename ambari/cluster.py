@@ -62,6 +62,9 @@ class Cluster(object):
     def stop(self):
         data={"RequestInfo":{"context":"_PARSE_.STOP.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"'+self.name+'"}},"Body":{"ServiceInfo":{"state":"INSTALLED"}}}
         return self.client.put(self.url+"/services",data,status_code=202)
+    def restart_required(self):
+        data={"RequestInfo":{"command":"RESTART","context":"Restart all required services","operation_level":"host_component"},"Requests/resource_filters":[{"hosts_predicate":"HostRoles/stale_configs=true"}]}
+        return self.client.create(self.url+"/requests",data)
     def add_hosts(self,host_groups):
         data=[]
         for hname in host_groups:
