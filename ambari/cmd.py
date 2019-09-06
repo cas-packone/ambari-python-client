@@ -37,6 +37,7 @@ def host_clone():
 
 def host_delete():
     client.cluster.get_host(args.opts[0]).delete()
+    client.cluster.restart_required()
 
 def service_start():
     if args.opts:
