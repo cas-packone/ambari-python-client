@@ -60,7 +60,7 @@ class Cluster(object):
     def HDFS_usage(self):
         metri_all=self.client.get(self.url+'/components/?ServiceComponentInfo/component_name=NAMENODE&fields=host_components/metrics/dfs/FSNamesystem/*')
         namenode_metric=metri_all['items'][0]["host_components"][0]["metrics"]["dfs"]["FSNamesystem"]
-        return FSNamesystem["CapacityUsedGB"]/FSNamesystem["CapacityTotalGB"]
+        return namenode_metric["CapacityUsedGB"]/namenode_metric["CapacityTotalGB"]
     def start(self):
         data={"RequestInfo":{"context":"_PARSE_.START.ALL_SERVICES","operation_level":{"level":"CLUSTER","cluster_name":"'+self.name+'"}},"Body":{"ServiceInfo":{"state":"STARTED"}}}
         return self.client.put(self.url+"/services",data,status_code=202,bad_code_retry=True)
