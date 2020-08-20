@@ -56,6 +56,9 @@ def service_list():
     for s in client.cluster.services:
         print(s.name)
 
+def service_monitorHDFS():
+    print(client.cluster.HDFS_usage)
+
 def request_list():
     for r in reversed(client.cluster.requests):
         print(r)
