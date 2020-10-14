@@ -5,7 +5,7 @@ setup(
     version = "0.1.7",
     keywords = ("pip", "ambari", "packone"),
     description = "Amabri python client based on ambari rest api.",
-    long_description = open('README.rst').read(),
+    long_description = open('README.md').read(),
     license = "Apache-2.0 Licence",
     url = "https://github.com/excelwang/ambari-python-client",
     author = "Excel Wang",
